@@ -1,4 +1,5 @@
 var issueContainerEl = document.querySelector("#issues-container");
+var limitWarningEl = document.querySelector("#limit-warning");
 
 function getRepoIssues(repo) {
     var apiUrl = "https://api.github.com/repos/" + repo + "/issues?direction=asc";
@@ -9,6 +10,11 @@ function getRepoIssues(repo) {
                 response.json()
                     .then(function(data){
                         displayIssues(data);
+
+                        //check if api has paginated issues
+                        if(response.headers.get("Link")) {
+                            displayWarning(repo);
+                        }
                     })
             }
             else {
@@ -16,6 +22,21 @@ function getRepoIssues(repo) {
             }
         });
 }
+
+//function to display a warning for overflow of repos
+function displayWarning(repo){
+    //add text to warning container
+    limitWarningEl.textContent = "To see more than 30 issues, visit ";
+
+    //append a link element with an hred attr that points to the github repo url
+    var linkEl = document.createElement("a");
+    linkEl.textContent = "See More Issues on Github.com";
+    linkEl.setAttribute("href", "https://github.com/" + repo + "/issues");
+    linkEl.setAttribute("target", "_blank");
+
+    //append the warning to container
+    limitWarningEl.appendChild(linkEl);
+    };
 
 //function to display our fetched issues
 function displayIssues(issues){
